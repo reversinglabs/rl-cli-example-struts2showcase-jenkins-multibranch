@@ -1,0 +1,60 @@
+pipeline {
+    // agent any // If set to any, all available agents need rl-secure installed and initialized
+    agent {
+        // Choose an agent where rl-secure is installed
+        label 'scan-rl-secure-dev'
+    }
+
+    environment {
+        // Mandatory
+        MY_ARTIFACT_TO_SCAN="struts2-showcase.war"
+        BUILD_PATH="target"
+        REPORT_PATH="RLReports"
+        RLSECURE_DIR="/mount/nfs/rl-store"
+        RL_STORE="/mount/nfs/rl-store"
+
+        // RL_VERBOSE="1" // 0 is the default
+        // WITH_AUTO_DIFF_SCAN="0" // 1 is the default
+        // RL_PACKAGE_URL="" // Optional override supported
+        // RL_DIFF_WITH="" // Optional override supported
+    }
+
+    stages {
+        stage('# Build') {
+            steps {
+                withMaven( maven: 'mvn3' ) {
+                    sh 'mvn clean package'
+                }
+            }
+        }
+
+        stage('# Test rl-secure') {
+            steps {
+                sh '''
+                rm -rf ${REPORT_PATH} # Make sure it is empty, the script will create it
+                ./scan-script-cli.sh
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: env.REPORT_PATH + '/*.json',
+                onlyIfSuccessful: false
+
+            // If the job never succeeds due to an error in Jenkins, the report link never shows
+            // After the first fully successful job, the link is created and also updated on failure
+            publishHTML (
+                target: [
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: false,
+                    reportDir: env.REPORT_PATH,
+                    reportFiles: 'rl-html/sdlc.html',
+                    reportName: 'ReversingLabsSdlcReport',
+                ]
+            )
+        }
+    }
+}

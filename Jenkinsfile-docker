@@ -1,0 +1,64 @@
+pipeline {
+    // agent any
+    agent {
+        // Choose an agent where Docker is installed
+        label 'scan-rl-secure-dev'
+    }
+
+    environment {
+        // mandatory
+        MY_ARTIFACT_TO_SCAN="struts2-showcase.war"
+        BUILD_PATH="target"
+        REPORT_PATH="RlReports"
+        RL_STORE="/mount/nfs/rl-store" // if no store is specified, diff scan will not be possible
+
+        // RL_VERBOSE="1" // 0 is the default
+        // WITH_AUTO_DIFF_SCAN="0" // 1 is the default
+        // RL_PACKAGE_URL="" // Optional override supported
+        // RL_DIFF_WITH="" // Optional override supported
+    }
+
+    stages {
+        stage('# Build') {
+            steps {
+                withMaven( maven: 'mvn3' ) {
+                    sh 'mvn clean package'
+                }
+            }
+        }
+
+        stage('# Test rl-secure') {
+            environment {
+                RLSECURE_SITE_KEY = credentials('rl-secure-site-key')
+                RLSECURE_ENCODED_LICENSE = credentials('rl-secure-encoded-key')
+            }
+
+            steps {
+                sh '''
+                rm -rf ${REPORT_PATH} # Make sure it is empty, the script will create it
+                ./scan-script-docker.sh
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: env.REPORT_PATH + '/*.json',
+                onlyIfSuccessful: false
+
+            // If the job never succeeds due to an error in Jenkins, the report link never shows
+            // After the first fully successful job, the link is created and also updated on failure
+            publishHTML (
+                target: [
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: false,
+                    reportDir: env.REPORT_PATH,
+                    reportFiles: 'rl-html/sdlc.html',
+                    reportName: 'ReversingLabsSdlcReport',
+                ]
+            )
+        }
+    }
+}
