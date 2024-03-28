@@ -1,6 +1,6 @@
 # ReversingLabs rl-secure Jenkins Multibranch Examples
 
-This repository provides two working examples of Jenkins pipeline scripts to illustrate scanning with **rl-secure** - the [ReversingLabs secure.software CLI](https://docs.secure.software/cli/).
+This repository provides two working examples of Jenkins pipeline scripts to illustrate scanning with **rl-secure** - the [ReversingLabs Spectra Assure CLI](https://docs.secure.software/cli/).
 
 The rl-secure CLI tool is capable of scanning [nearly any type](https://docs.secure.software/concepts/language-coverage) of software artifact or package that results from a build.
 
@@ -11,7 +11,7 @@ The following examples are provided in this repository:
 - **[Jenkinsfile_docker](#Jenkinsfile-docker)** - uses the Docker image to scan artifacts
 - **[Jenkinsfile-cli](#Jenkinsfile-cli)** - uses the rl-secure CLI directly installed to scan artifacts
 
-The difference between this repository and the other ReversingLabs [Jenkins examples repository](https://github.com/reversinglabs/rl-cli-example-struts2showcase-jenkins) is support for differential package analysis.
+The difference between this repository and the other ReversingLabs [Jenkins examples repository](https://github.com/reversinglabs/rl-cli-example-struts2showcase-jenkins) is the support for differential package analysis.
 
 
 ## Jenkins requirements
@@ -108,5 +108,5 @@ Consult the built-in global variable reference at `${YOUR_JENKINS_URL}/pipeline-
 ## Useful resources
 
 - The official Jenkins documentation about [multibranch pipelines](https://www.jenkins.io/doc/book/pipeline/multibranch/)
-- [ReversingLabs secure.software CLI documentation](https://docs.secure.software/cli/)
+- [ReversingLabs Spectra Assure CLI documentation](https://docs.secure.software/cli/)
 - [What is the maximum length of a file path in Ubuntu?](https://askubuntu.com/questions/859945/what-is-the-maximum-length-of-a-file-path-in-ubuntu)
